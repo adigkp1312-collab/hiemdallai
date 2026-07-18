@@ -1,8 +1,8 @@
 # Heimdall — UI and Product Design Specification
 
 **Purpose:** Source of truth for creating the Heimdall mockup UI  
-**Current phase:** Documentation  
-**Next phases:** Mock designs, then prototype
+**Current phase:** Mock-design refinement  
+**Next phase:** Clickable prototype
 
 > Heimdall turns a question scattered across enterprise systems into a visual answer shaped for the person asking and backed by evidence they are authorized to inspect.
 
@@ -89,11 +89,25 @@ Define the product story, personas, source behavior, screen inventory, informati
 
 ### Phase 2 — Mock designs
 
-Create high-fidelity desktop mockups from this document. The mock should prove the idea without requiring a working backend.
+Create the compact Developer mobile flow first, then expand the approved information hierarchy to desktop and the other personas. The mock should prove the idea without requiring a working backend.
 
 ### Phase 3 — Prototype
 
 Replace mock data and simulated transitions with a working pipeline. The prototype implements the approved mock rather than redesigning the product during development.
+
+### Approved direction from the minimal UI exploration
+
+The supplied minimal UI exploration establishes the preferred interaction direction:
+
+- Question-first, not dashboard-first
+- One-sentence answer before supporting detail
+- Progressive disclosure instead of showing every panel at once
+- Mobile flow as the fastest way to prove the core idea
+- Details open inline or on a focused pushed screen
+- Process is available for trust, but never competes with the answer
+- No fake percentage progress
+
+The exploration is a structural reference, not a pixel-perfect final design. It contains legacy `Drishti` naming, a generic red-accent design system, and unproven claims about determinism and runtimes. Those elements are not approved.
 
 ---
 
@@ -256,7 +270,7 @@ Collapsed stage card:
 - User-facing label
 - One-line outcome
 - Status: `Waiting`, `Working`, `Complete`, `Partial`, or `Needs attention`
-- Duration for completed runs
+- Measured duration for completed prototype runs; omit it in static mockups
 
 Expanded stage card shows only information useful for comprehension. Never show prompts, chain-of-thought, credentials, or implementation code.
 
@@ -272,10 +286,23 @@ The default view is a concise visual brief containing:
 
 - User question
 - One-sentence verdict
-- Three to five visual panels
+- Source count, evidence status, and generated time
+- Four or five collapsed topic rows
 - Evidence chips attached to decision-relevant claims
 - Visible conflict and information-gap indicators
-- A short action path
+- A follow-up input
+
+For the Developer flow, use these rows in this order:
+
+1. **Evidence** — record and source count
+2. **Likely fix** — pull request, file, or technical conclusion
+3. **Incident timeline** — the events that establish causality
+4. **Recommended actions** — owners, sequence, and timing
+5. **How this was built** — seven stages and source-selection outcomes
+
+Only the one-sentence verdict is expanded by default. Selecting a topic may expand it inline for a quick scan or push to a focused detail screen when the content needs code, records, or a longer timeline.
+
+Do not use chat bubbles. Heimdall is question-first and answer-first, but it is not presented as a conversation transcript.
 
 ### How it was built
 
@@ -285,29 +312,60 @@ A secondary view answers three questions:
 2. What facts, conflicts, and gaps were established?
 3. How did those facts become the visible answer?
 
-Recommended toggle:
+On desktop, use `Answer | How it was built` as a view toggle.
 
-`Answer | How it was built`
+On mobile, place **How this was built** as the final collapsed topic row. This keeps process available without making it a primary navigation decision.
 
 The process view is evidence, not an engineering console.
+
+### Progressive-disclosure rule
+
+At every screen depth, reveal only what helps the user make the next decision:
+
+| Level | Show | Keep behind interaction |
+|---|---|---|
+| Answer | Verdict, strongest metric or fact, topic rows | Full records, code, stage detail |
+| Expanded row | Short summary, source chips, one next action | Complete record and external system |
+| Detail screen | Full supporting view and permission context | Internal orchestration |
+| External system | Original authorized record | Heimdall internals |
+
+The UI should feel simpler as the underlying evidence becomes more complex.
 
 ---
 
 ## 9. Global UI structure
 
-### Header
+### Mobile header
 
-**Left:** Heimdall wordmark and `Enterprise Intelligence`  
-**Center:** Persistent question input  
-**Right:** Persona selector and signed-in user chip
+**Left:** Back control when needed, compact Heimdall avatar, `HEIMDALL`  
+**Right:** Signed-in user and concluded persona, for example `Maya K. · Developer`
 
-Input placeholder:
+The header is deliberately small. The mythological avatar may be `28px` in the header and up to `96px` on the empty Ask screen. Do not repeat the large guardian visual inside answer and evidence screens.
+
+### Question input
+
+Ask-screen placeholder:
 
 `Ask a question across your enterprise knowledge…`
 
-Primary action:
+Follow-up placeholder:
 
-`Build visual brief`
+`Ask a follow-up…`
+
+The submit control may be an icon button when its accessible name is available.
+
+### Mobile canvas
+
+- Reference content width: `402px`
+- Reference artboard: `402 × 874`
+- Side padding: `16px`
+- Major vertical spacing: `16–24px`
+- Minimum interactive target: `44px`
+- One-column composition
+- Sticky follow-up input on answer screens
+- No permanent bottom navigation in the first prototype
+
+The first clickable prototype is mobile-first because it forces a clear hierarchy and is easier to demonstrate as one continuous flow.
 
 ### Desktop canvas
 
@@ -316,15 +374,35 @@ Primary action:
 - Outer margin: `48px`
 - Twelve-column grid
 - Column gap: `24px`
-- Main result composition: six-column panels
+- Main result composition: answer column plus optional evidence or process column
 
-The first mockup phase is desktop-first.
+Desktop adapts the approved mobile hierarchy; it must not introduce a separate information architecture.
 
 ---
 
 ## 10. Required mockup frames
 
-Create eight desktop frames.
+### Core mobile flow — build first
+
+Create these seven connected frames:
+
+1. **Ask** — avatar, product promise, example questions, Developer lens, connected-source count, question input, permission line
+2. **Building** — question, current named stage, `stage N of 7`, collapsed stage list, source activity
+3. **Answer** — one-sentence verdict and five collapsed topic rows
+4. **Likely fix detail** — repository, file, review state, compact diff, source chips, `Open in GitHub`
+5. **Evidence detail** — record counts grouped by source, unavailable-by-permission state, permission reminder
+6. **Timeline and actions** — causal events followed by clearly labeled recommendations
+7. **How this was built / honest states** — seven stages, sources used/skipped/unavailable, conflict, gap, and partial-result treatment
+
+Navigation contract:
+
+`Ask → Building → Answer → Detail → Back to Answer`
+
+Back from Building returns to Ask. Back from a detail screen returns to the same answer state. A follow-up begins a new run while preserving the previous question in history.
+
+### Desktop expansion — build after the mobile flow
+
+Create eight desktop frames using the same hierarchy.
 
 ### Frame 1 — Ask
 
@@ -587,7 +665,9 @@ For the canonical demo, use zero decorative generated images.
 
 ### Direction
 
-The interface should feel like a calm enterprise intelligence room: serious, legible, evidence-led, and slightly cinematic.
+The interface should feel like a precise enterprise briefing: quiet, editorial, evidence-led, and fast to scan.
+
+Use the minimal UI exploration’s flat structure, strong rules, compact metadata, and progressive disclosure. Keep Heimdall’s navy-and-gold identity instead of inheriting the exploration’s generic red accent.
 
 It must not look like:
 
@@ -596,48 +676,58 @@ It must not look like:
 - A developer observability console
 - A fantasy game UI
 - A slide deck embedded inside a browser
+- A grid of equally important cards
+- A dark cinematic interface that reduces legibility during a live demo
 
 ### Colors
 
 | Token | Value | Use |
 |---|---|---|
-| Canvas | `#08111F` | Application background |
-| Surface | `#13213A` | Primary cards |
-| Raised surface | `#192A47` | Selected and expanded cards |
-| Primary text | `#F7F9FC` | Headlines and values |
-| Secondary text | `#DDE5F1` | Body |
-| Muted text | `#91A0B7` | Metadata |
-| Heimdall gold | `#E8B04A` | Primary action and active stage |
-| Highlight gold | `#FFD481` | Verdict emphasis |
-| Intelligence cyan | `#5BC0EB` | Evidence and focus |
-| Success | `#54D18B` | Verified and healthy |
-| Warning | `#F5B942` | Gaps and partial states |
-| Risk | `#F06F6F` | Critical risk and conflicts |
-| Purple | `#B491FF` | Engineering perspective |
+| Canvas | `#F3F2F2` | Application background |
+| Surface | `#FFFFFF` | Answer and detail surfaces |
+| Muted surface | `#EAE9E9` | Inputs and secondary regions |
+| Primary text | `#201E1D` | Headlines, values, and body |
+| Muted text | `#696563` | Metadata; chosen for readable contrast |
+| Divider | `rgba(32, 30, 29, 0.28)` | Rules and boundaries |
+| Heimdall navy | `#081A33` | Avatar, wordmark, and high-emphasis text |
+| Action gold | `#9A6200` | Primary action, focus, and active stage |
+| Gold tint | `#F4E4C4` | Selected and highlighted background |
+| Success | `#287A50` | Verified and healthy |
+| Warning | `#9A6200` | Gaps and partial states |
+| Risk | `#B42318` | Critical risk and conflicts |
+
+Platform colors identify source provenance only. They do not compete with status colors or the primary action.
 
 ### Typography
 
-- Verdict and editorial headings: `Georgia` or `Source Serif 4`
-- Product UI and body: `Inter`
+- Product headings and body: `Archivo`
 - Data and code: `JetBrains Mono`
+- System fallback: `system-ui, sans-serif`
+
+Use weight and spacing before adding more colors. The one-sentence verdict is the largest text on the Answer screen.
 
 ### Shape
 
-- Main card radius: `16px`
-- Small component radius: `10px`
-- Pills: full radius
-- Border: `1px` using white at approximately 8% opacity
-- Avoid heavy drop shadows
+- Main surfaces: square or `2px` radius
+- Source chips: square or `2px` radius
+- Use `1px` and `2px` dividers to create hierarchy
+- Avoid floating-card shadows
+- Reserve circles for the avatar, status dots, and source marks
+
+The interface should be organized by spacing and rules, not by nesting many rounded containers.
 
 ### Motion
 
 - Stage completion travels from 1 to 7
 - Source pills appear as evidence is gathered
-- Answer panels reveal in narrative order
-- Persona switch cross-fades the entire brief
-- Evidence drawer slides from the right
+- Answer rows reveal in narrative order
+- Inline details open without moving the user away from context
+- Pushed detail screens use a short horizontal transition
+- Persona switch cross-fades the answer content
 
 Motion explains state change; it does not imply invention.
+
+Use approximately `150–250ms` for interface transitions. Respect reduced-motion preferences. Do not animate the guardian’s eyes.
 
 ---
 
@@ -687,10 +777,26 @@ No executive-sponsor activity is recorded after March.
 ### Asking
 
 1. Enter question.
-2. Select `Build visual brief`.
+2. Submit with the arrow action or select a suggested question.
 3. Show building state.
 4. Progress through seven stages.
 5. Reveal answer.
+
+### Building
+
+- Show the current named stage and `stage N of 7`
+- Keep the complete stage list collapsed by default
+- Reveal source activity only after evidence gathering begins
+- Use `Working`, `Found`, `Unavailable`, and `Complete`; do not simulate precision
+- Allow Back to return to Ask
+
+### Inspecting the answer
+
+- Tapping a collapsed row expands a short preview or opens a detail screen
+- Tapping a source chip opens the evidence record with its permission context
+- Back returns to the same answer and scroll position
+- External-system actions use explicit labels such as `Open in GitHub`
+- Recommendations remain visually and verbally distinct from established facts
 
 ### Switching persona
 
@@ -748,6 +854,21 @@ Do not replace a useful partial result with a generic error screen.
 
 Trust comes from evidence and outcomes, not disclosure of proprietary orchestration.
 
+### Claims the interface may make
+
+Use trust language only when the prototype can support it:
+
+| Claim | Requirement |
+|---|---|
+| `Every claim linked` | Every visible factual claim has an inspectable evidence mapping |
+| `N sources connected` | The count reflects authenticated connectors available to this user |
+| `N records from M sources` | The evidence detail lists those exact records and sources |
+| `Partial brief` | Missing sources and the effect on the answer are named |
+| `Reproducible run` | The system records the question, permission snapshot, source versions, and configuration needed to reproduce it |
+| `Deterministic run` | Avoid this claim unless repeated controlled tests produce the same result |
+
+Do not present invented stage durations such as `15.3s` in a working prototype. During static mockups, omit runtimes or label the entire screen as demo data. A judge is more likely to trust an honest stage indicator than fabricated precision.
+
 ---
 
 ## 17. Accessibility
@@ -755,7 +876,7 @@ Trust comes from evidence and outcomes, not disclosure of proprietary orchestrat
 - Minimum normal-text contrast: `4.5:1`
 - Do not communicate status through color alone
 - Evidence chips require keyboard focus
-- Interactive targets should be at least `40px` high where practical
+- Interactive targets should be at least `44px` high where practical
 - Icons need text labels
 - Critical evidence cannot exist only on hover
 - Timelines and charts need text summaries
@@ -767,18 +888,20 @@ Trust comes from evidence and outcomes, not disclosure of proprietary orchestrat
 
 The mock-design phase is complete when:
 
-1. All eight required desktop frames exist.
-2. CxO and Developer answers visibly differ in content, sources, and visual vocabulary.
-3. User identity and persona are always clear.
-4. Source priority changes with persona without implying that persona changes truth.
-5. All seven stages are understandable without technical explanation.
-6. Every decision-relevant answer panel has inspectable evidence.
-7. The evidence drawer is fully designed.
-8. Permission skips, relevance skips, conflicts, and gaps are visibly distinct.
+1. The seven mobile frames form a connected Ask → Build → Answer → Detail flow.
+2. The default Answer screen is one sentence plus no more than five collapsed topic rows.
+3. Back navigation returns to the expected state without losing the answer.
+4. User identity and persona are always clear.
+5. The UI uses `Heimdall` everywhere; no `Drishti` label remains.
+6. All seven stages are understandable without technical explanation or fake percentage progress.
+7. Every decision-relevant claim has inspectable evidence.
+8. Permission skips, relevance skips, conflicts, gaps, and recommendations are visibly distinct.
 9. Real enterprise platform names are used consistently.
-10. The CxO answer is understandable within ten seconds.
+10. No unproven deterministic or precise-runtime claim appears.
 11. The process view proves trust without exposing prompts or hidden reasoning.
-12. The screens support a ninety-second demo without requiring narration to explain basic behavior.
+12. The Developer answer is understandable within ten seconds.
+13. The mobile screens support a ninety-second demo without narration to explain basic behavior.
+14. The later CxO and Developer desktop answers visibly differ in content, sources, and visual vocabulary while preserving the same interaction hierarchy.
 
 ---
 
